@@ -35,7 +35,7 @@ jobs:
         run: npm run build:web
         env:
           VITE_BASE_PATH: /mango-daily/
-          VITE_API_BASE: https://api.81.68.126.106.sslip.io
+          VITE_API_BASE: https://api.81.68.126.106.nip.io
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_DIR="/var/www/mango-daily"
 REPO_URL="https://github.com/dlxdjj/mango-daily.git"
-API_HOST="api.81.68.126.106.sslip.io"
+API_HOST="api.81.68.126.106.nip.io"
 
 echo "[1/7] Installing system packages"
 sudo apt update

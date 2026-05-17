@@ -59,23 +59,23 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-For HTTPS without buying a domain, this project can use sslip.io:
+For HTTPS without buying a domain, this project can use nip.io:
 
 ```text
-api.81.68.126.106.sslip.io
+api.81.68.126.106.nip.io
 ```
 
 That hostname automatically resolves to `81.68.126.106`, so GitHub Pages can call:
 
 ```text
-https://api.81.68.126.106.sslip.io
+https://api.81.68.126.106.nip.io
 ```
 
 Install certbot and issue SSL:
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d api.81.68.126.106.sslip.io
+sudo certbot --nginx -d api.81.68.126.106.nip.io
 ```
 
 ## 6. Update deployment
