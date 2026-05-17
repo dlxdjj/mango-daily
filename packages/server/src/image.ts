@@ -33,8 +33,12 @@ class OpenAIImageProvider implements ImageProvider {
       prompt,
       '',
       'Use the uploaded reference image as the strict character identity reference.',
-      'Keep the same Mango dog IP: white round head and body, yellow floppy ears, green sprout with two leaves, light blue bib, black dot eyes, pink cheeks, soft crayon pencil hand-drawn texture.',
-      'Only change the pose, props, expression, and simple scene. Do not redesign the character.',
+      'The generated image must look like the same IP character from the reference, not a new character.',
+      'Keep the same Mango dog IP: white round head and soft white body, yellow floppy ears, green sprout with two leaves, light blue bib, tiny black dot eyes, small mouth, pink cheeks.',
+      'Preserve the exact soft crayon / pencil brush feeling from the reference: fuzzy pencil outlines, waxy pastel fill, handmade cute sticker texture, slightly blurry edges, no glossy digital rendering.',
+      'Prioritize the character pose and facial expression over the background. The pose and expression should match the theme, while still staying simple and cute.',
+      'Use a minimal light background with plenty of whitespace. Add only 1 to 3 small cute props or symbols to support the theme. Do not create a detailed environment.',
+      'Allowed changes: simple pose, tiny prop, mild expression. Not allowed: redesigning the body, changing colors, adding realistic fur, 3D style, complex background, dramatic lighting, strong perspective, multiple characters, or large text.',
       `Scene: ${sceneDescription}`
     ].join('\n');
 
