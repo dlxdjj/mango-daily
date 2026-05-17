@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/mango-daily/sw.js', { scope: '/mango-daily/' })})}
