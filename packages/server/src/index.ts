@@ -236,10 +236,18 @@ app.post('/api/recommendations/generate', async (req, res) => {
     let generatedImageUrl: string | null = null;
     let imageError = '';
 
-    if (imageProvider && primaryReference) {
+    const referenceRows = db.prepare(
+      `SELECT * FROM mango_references
+       ORDER BY is_primary DESC,
+                CASE WHEN description LIKE '%用户自绘%' THEN 0 ELSE 1 END,
+                created_at DESC
+       LIMIT 8`
+    ).all() as any[];
+
+    if (imageProvider && referenceRows.length > 0) {
       try {
         generatedImageUrl = await imageProvider.generate(
-          path.join(UPLOAD_DIR, primaryReference.file_path),
+          referenceRows.map(reference => path.join(UPLOAD_DIR, reference.file_path)),
           result.imageScene || '',
           result.imagePrompt || ''
         );

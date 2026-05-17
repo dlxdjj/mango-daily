@@ -5,7 +5,7 @@ import path from 'node:path';
 export interface ImageProvider {
   name: string;
   isConfigured(): boolean;
-  generate(referenceImagePath: string, sceneDescription: string, prompt: string): Promise<string>;
+  generate(referenceImagePaths: string[], sceneDescription: string, prompt: string): Promise<string>;
 }
 
 class OpenAIImageProvider implements ImageProvider {
@@ -28,27 +28,30 @@ class OpenAIImageProvider implements ImageProvider {
     return Boolean(process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('your-'));
   }
 
-  async generate(referenceImagePath: string, sceneDescription: string, prompt: string): Promise<string> {
+  async generate(referenceImagePaths: string[], sceneDescription: string, prompt: string): Promise<string> {
     const fullPrompt = [
       prompt,
       '',
-      'Use the uploaded reference image as the strict character identity reference.',
-      'The generated image must look like the same IP character from the reference, not a new character.',
-      'Keep the same Mango dog IP: white round head and soft white body, yellow floppy ears, green sprout with two leaves, light blue bib, tiny black dot eyes, small mouth, pink cheeks.',
-      'Preserve the exact soft crayon / pencil brush feeling from the reference: fuzzy pencil outlines, waxy pastel fill, handmade cute sticker texture, slightly blurry edges, no glossy digital rendering.',
-      'Composition: sticker-like mascot portrait, centered, Mango dog occupies 70% to 85% of the image. Do not make the character small.',
-      'Prioritize the character pose and facial expression over the background. The theme should be expressed through a simple cute pose, mild facial expression, and at most one tiny prop.',
-      'Use a minimal cute background: plain white, pale warm yellow, or pale pink, with optional tiny hearts, stars, dots, or soft blush marks. Keep lots of whitespace.',
-      'Do not create a full scene or environment. No room, no office, no bed, no wall, no detailed furniture, no landscape.',
-      'No readable text anywhere in the image. No English words, no Chinese characters, no signs, no speech bubbles, no labels.',
-      'Allowed changes: simple pose, tiny prop, mild expression. Not allowed: redesigning the body, changing colors, adding realistic fur, 3D style, complex background, dramatic lighting, strong perspective, multiple characters, or large text.',
+      'Use all uploaded reference images as a strict style sheet and character sheet. The output must look like it belongs to the exact same hand-drawn sticker pack.',
+      'This is a small square cute sticker illustration, not a scene illustration, not a comic panel, not a storybook page.',
+      'Character lock: white rounded head and soft white body, yellow floppy ears, green sprout with two leaves, tiny black dot eyes, tiny mouth, pink cheeks, light blue bib. Keep the same proportions and simple body shape.',
+      'Style lock: fuzzy gray pencil outline, waxy crayon pastel fill, slightly blurry worn handmade texture, childlike hand-drawn softness, low-detail cute doodle. Keep the same rough brush, same softness, same simple coloring as the references.',
+      'Composition lock: Mango dog is centered and large, occupying 80% to 90% of the square canvas. The character should be the image.',
+      'Theme expression: use only Mango dog pose, facial expression, and at most one tiny prop to express the theme. Do not build a room, desk, bed, office, wall, landscape, or full environment.',
+      'Background lock: simple pastel solid or soft gradient background, usually pale yellow, pale pink, pale green, or white. Optional tiny doodle hearts, stars, flowers, swirls, or dots around the character.',
+      'No readable text anywhere. No English words, no Chinese characters, no signs, no labels, no speech bubbles. If a prompt concept suggests a sign or note, replace it with a blank cute prop or with no prop.',
+      'Forbidden: detailed background, office, bed, wall, furniture, landscape, realistic lighting, 3D render, anime style, thick digital painting, changing the character design, making the dog small.',
       `Scene: ${sceneDescription}`
     ].join('\n');
 
-    const image = await fs.promises.readFile(referenceImagePath);
+    const imageFiles = await Promise.all(referenceImagePaths.map(async referenceImagePath => {
+      const image = await fs.promises.readFile(referenceImagePath);
+      return new File([image], path.basename(referenceImagePath), { type: mimeTypeFor(referenceImagePath) });
+    }));
+
     const result = await this.client.images.edit({
       model: this.model,
-      image: new File([image], path.basename(referenceImagePath), { type: mimeTypeFor(referenceImagePath) }),
+      image: imageFiles.length === 1 ? imageFiles[0] : imageFiles,
       prompt: fullPrompt,
       size: this.size,
       quality: this.quality,
