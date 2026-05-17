@@ -7,7 +7,7 @@ API_HOST="api.81.68.126.106.sslip.io"
 
 echo "[1/7] Installing system packages"
 sudo apt update
-sudo apt install -y git nginx build-essential curl certbot python3-certbot-nginx
+sudo apt install -y git nginx build-essential curl unzip certbot python3-certbot-nginx
 
 if ! command -v node >/dev/null 2>&1; then
   echo "[2/7] Installing Node.js 20"
@@ -28,10 +28,19 @@ echo "[4/7] Cloning/updating app"
 sudo mkdir -p /var/www
 sudo chown -R "$USER:$USER" /var/www
 if [ ! -d "$APP_DIR/.git" ]; then
-  git clone "$REPO_URL" "$APP_DIR"
+  rm -rf "$APP_DIR"
+  if ! git clone --depth 1 "$REPO_URL" "$APP_DIR"; then
+    echo "Git clone failed; falling back to GitHub zip download"
+    rm -rf "$APP_DIR" /tmp/mango-daily-main.zip /tmp/mango-daily-main
+    curl -L --retry 5 --retry-delay 3 \
+      -o /tmp/mango-daily-main.zip \
+      https://github.com/dlxdjj/mango-daily/archive/refs/heads/main.zip
+    unzip -q /tmp/mango-daily-main.zip -d /tmp
+    mv /tmp/mango-daily-main "$APP_DIR"
+  fi
 else
   cd "$APP_DIR"
-  git pull
+  git pull || true
 fi
 
 cd "$APP_DIR"
