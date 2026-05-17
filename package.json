@@ -1,0 +1,15 @@
+{
+  "name": "mango-daily",
+  "version": "0.1.0",
+  "private": true,
+  "description": "今天发什么 - 芒狗 mango 的小红书日更助手",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=packages/server",
+    "dev:web": "npm run dev --workspace=packages/web",
+    "build:web": "npm run build --workspace=packages/web",
+    "build:server": "npm run build --workspace=packages/server"
+  }
+}

@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #FFF7D6;
+  --color-card: #FFFFFF;
+  --color-primary: #F8D76E;
+  --color-primary-dark: #E7B93F;
+  --color-blue: #BFE8F5;
+  --color-blue-dark: #7DC5DC;
+  --color-text: #3F3528;
+  --color-muted: #8A7D68;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  /* 移动端 safe area */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: linear-gradient(180deg, #FFF7D6 0%, #FFEAB2 100%);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* 顶部小标点装饰 */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(248, 215, 110, 0.4) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* 按钮按下效果 */
+.btn-press {
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* 卡片悬浮 */
+.float-in {
+  animation: floatIn 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 加载点点点 */
+.loading-dots span {
+  display: inline-block;
+  animation: dotBlink 1.4s infinite both;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBlink {
+  0%, 80%, 100% { opacity: 0.3; }
+  40% { opacity: 1; }
+}
+
+/* 隐藏滚动条但保留滚动 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }

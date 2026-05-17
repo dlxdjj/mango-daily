@@ -1,0 +1,72 @@
+# Tencent Cloud Deployment
+
+Recommended server: Tencent Cloud Lighthouse, Ubuntu 22.04, 2C2G.
+
+## 1. Install runtime
+
+```bash
+sudo apt update
+sudo apt install -y git nginx build-essential
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo npm install -g pm2
+```
+
+## 2. Clone and build
+
+```bash
+cd /var/www
+sudo git clone https://github.com/YOUR_NAME/mango-daily.git
+sudo chown -R $USER:$USER /var/www/mango-daily
+cd /var/www/mango-daily
+npm ci
+npm run build:server
+```
+
+## 3. Configure environment
+
+```bash
+cp packages/server/.env.example packages/server/.env
+nano packages/server/.env
+```
+
+Production values:
+
+```env
+PORT=3001
+DATABASE_PATH=/var/www/mango-daily/packages/server/data.db
+UPLOAD_DIR=/var/www/mango-daily/packages/server/uploads
+CORS_ORIGIN=https://YOUR_NAME.github.io
+DEEPSEEK_API_KEY=...
+OPENAI_API_KEY=...
+```
+
+## 4. Start API
+
+```bash
+pm2 start ecosystem.config.cjs
+pm2 save
+pm2 startup
+```
+
+## 5. Nginx reverse proxy
+
+```bash
+sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/mango-daily-api
+sudo nano /etc/nginx/sites-available/mango-daily-api
+sudo ln -s /etc/nginx/sites-available/mango-daily-api /etc/nginx/sites-enabled/mango-daily-api
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+For HTTPS, bind a domain such as `api.your-domain.com` to the server IP, then use Tencent Cloud SSL or certbot.
+
+## 6. Update deployment
+
+```bash
+cd /var/www/mango-daily
+git pull
+npm ci
+npm run build:server
+pm2 restart mango-daily-api
+```
