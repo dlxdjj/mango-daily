@@ -59,7 +59,24 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-For HTTPS, bind a domain such as `api.your-domain.com` to the server IP, then use Tencent Cloud SSL or certbot.
+For HTTPS without buying a domain, this project can use sslip.io:
+
+```text
+api.81.68.126.106.sslip.io
+```
+
+That hostname automatically resolves to `81.68.126.106`, so GitHub Pages can call:
+
+```text
+https://api.81.68.126.106.sslip.io
+```
+
+Install certbot and issue SSL:
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d api.81.68.126.106.sslip.io
+```
 
 ## 6. Update deployment
 

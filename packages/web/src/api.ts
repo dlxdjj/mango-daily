@@ -6,7 +6,7 @@ export interface Settings {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  apiBase: import.meta.env.PROD ? '' : '',
+  apiBase: import.meta.env.VITE_API_BASE || '',
   syncToken: 'mango-please-change-me'
 };
 
