@@ -36,8 +36,11 @@ class OpenAIImageProvider implements ImageProvider {
       'The generated image must look like the same IP character from the reference, not a new character.',
       'Keep the same Mango dog IP: white round head and soft white body, yellow floppy ears, green sprout with two leaves, light blue bib, tiny black dot eyes, small mouth, pink cheeks.',
       'Preserve the exact soft crayon / pencil brush feeling from the reference: fuzzy pencil outlines, waxy pastel fill, handmade cute sticker texture, slightly blurry edges, no glossy digital rendering.',
-      'Prioritize the character pose and facial expression over the background. The pose and expression should match the theme, while still staying simple and cute.',
-      'Use a minimal light background with plenty of whitespace. Add only 1 to 3 small cute props or symbols to support the theme. Do not create a detailed environment.',
+      'Composition: sticker-like mascot portrait, centered, Mango dog occupies 70% to 85% of the image. Do not make the character small.',
+      'Prioritize the character pose and facial expression over the background. The theme should be expressed through a simple cute pose, mild facial expression, and at most one tiny prop.',
+      'Use a minimal cute background: plain white, pale warm yellow, or pale pink, with optional tiny hearts, stars, dots, or soft blush marks. Keep lots of whitespace.',
+      'Do not create a full scene or environment. No room, no office, no bed, no wall, no detailed furniture, no landscape.',
+      'No readable text anywhere in the image. No English words, no Chinese characters, no signs, no speech bubbles, no labels.',
       'Allowed changes: simple pose, tiny prop, mild expression. Not allowed: redesigning the body, changing colors, adding realistic fur, 3D style, complex background, dramatic lighting, strong perspective, multiple characters, or large text.',
       `Scene: ${sceneDescription}`
     ].join('\n');
