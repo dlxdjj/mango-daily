@@ -1,18 +1,51 @@
 # mango-daily（今天发什么）
 
-芒狗 mango 的小红书日更助手：DeepSeek 负责文案，GPT Image 负责基于基准图生成新图。
+芒狗 mango 原创 IP 的小红书日更内容助手。输入栏目和内容目标，AI 结合节奏日历、素材库和历史记录，自动生成帖子文案；并可用基准图生成新配图。
+
+## 功能
+
+- **AI 文案生成** — 选择栏目（芒狗诞生录/打工日记等）和内容目标（人设建设/涨粉/收藏等），DeepSeek 生成：选题、5 条标题建议、3 条封面文案、完整正文、评论引导、话题标签、推荐发布时间段
+- **节奏日历** — 根据当天星期和月初/月底自动注入情绪提示（周一"低电量不想上班"、周五"解放好运"等），让内容匹配当日氛围
+- **AI 配图生成** — 上传基准图后，OpenAI `gpt-image-1.5` 以基准图为角色参考，生成新场景配图
+- **基准图管理** — 上传/删除/设为主图，批量上传后可选 AI 视觉分析（Qwen-VL-Max）自动打标签（适合栏目、情绪、场景、描述）
+- **历史去重** — 生成时自动排除最近 14 天已生成的主题
+- **素材轮换** — 基准图按使用次数升序推荐，避免视觉疲劳
+- **PWA 前端** — 移动端优先 UI，暖黄色设计，可添加到手机主屏幕
+
+## 技术栈
+
+- **前端**：React 18 + TypeScript 5 + Vite 5 + Tailwind CSS 3 + React Router + PWA（vite-plugin-pwa）
+- **后端**：Express 4 + TypeScript 5 + SQLite（better-sqlite3）+ Zod 校验
+- **AI**：DeepSeek（文案生成，OpenAI 兼容接口）+ 阿里云百炼 Qwen-VL-Max（视觉分析打标签）+ OpenAI gpt-image-1.5（配图生成）
+- **部署**：PM2 进程管理 + Nginx 反向代理 + Let's Encrypt SSL（腾讯云轻量服务器）
 
 ## 项目结构
 
-```text
+```
 mango-daily/
 ├── packages/
-│   ├── server/         # Express + SQLite + DeepSeek + GPT Image
-│   └── web/            # React + Vite + PWA
-└── package.json        # npm workspace 根
+│   ├── server/                # Express 后端
+│   │   ├── src/
+│   │   │   ├── index.ts       # 主入口（路由、中间件）
+│   │   │   ├── db.ts          # SQLite 数据库初始化和操作
+│   │   │   ├── llm.ts         # LLM 提供者工厂（DeepSeek）
+│   │   │   ├── image.ts       # 图片生成提供者（OpenAI gpt-image-1.5）
+│   │   │   ├── prompts.ts     # 系统提示词和用户提示词构建
+│   │   │   └── calendar.ts    # 节奏日历
+│   │   └── .env.example
+│   └── web/                   # React 前端
+│       └── src/
+│           ├── pages/
+│           │   ├── Home.tsx       # 首页（AI 推荐生成）
+│           │   ├── Assets.tsx     # 基准图管理
+│           │   └── Settings.tsx   # 设置（后端连接、模型状态）
+│           └── api.ts             # API 调用封装
+├── deploy/                    # 部署配置（Nginx、启动脚本）
+├── ecosystem.config.cjs       # PM2 配置
+└── package.json               # npm workspace 根
 ```
 
-## 快速启动
+## 本地运行
 
 ### 1. 安装依赖
 
@@ -20,104 +53,51 @@ mango-daily/
 npm install
 ```
 
-### 2. 配置后端
+### 2. 配置环境变量
+
+参考 `packages/server/.env.example` 创建 `.env`，填写 LLM 和图片生成的 API Key（DeepSeek 必填，OpenAI 和 Qwen-VL 可选）。
+
+### 3. 启动
 
 ```bash
-cd packages/server
-cp .env.example .env
-```
-
-编辑 `.env`，至少填写：
-
-```env
-DEEPSEEK_API_KEY=sk-your-deepseek-key
-OPENAI_API_KEY=sk-your-openai-key
-```
-
-可选图片参数：
-
-```env
-OPENAI_IMAGE_MODEL=gpt-image-1.5
-OPENAI_IMAGE_SIZE=1024x1024
-OPENAI_IMAGE_QUALITY=medium
-```
-
-如果没有 `OPENAI_API_KEY`，系统仍会生成文案和画面描述，只是不生成图片。
-
-### 3. 启动后端
-
-```bash
+# 后端（端口 3001，首次启动自动创建 SQLite 数据库）
 cd packages/server
 npm run dev
-```
 
-后端跑在 `http://localhost:3001`，第一次启动会自动创建 SQLite 数据库 `data.db`。
-
-### 4. 启动前端
-
-新开一个终端：
-
-```bash
+# 前端（端口 5173，Vite 代理 /api → localhost:3001）
 cd packages/web
 npm run dev
 ```
 
-前端跑在 `http://localhost:5173`。
+### 4. 首次使用
 
-## 第一次使用
+1. 打开 http://localhost:5173 → 设置页，测试后端连接
+2. 基准图页 → 上传 3–8 张芒狗标准图 → 可批量运行 AI 视觉分析打标签
+3. 回到首页 → 选择栏目 + 内容目标 → 点击"今天发什么？"
 
-1. 打开“设置”页，测试后端连接，确认文案和图片模型状态。
-2. 打开“基准图”页，上传 3-8 张最标准的芒狗图。
-3. 选择一张作为“主图”。后续生成图片会优先参考这张图。
-4. 回到首页，选择栏目、内容目标和额外提示。
-5. 点击“今天发什么？”，系统会生成文案和一张新芒狗图。
+## API
+
+```
+GET    /api/health                      # 健康检查（LLM/图片模型状态）
+GET    /api/references                  # 基准图列表
+POST   /api/references/upload           # 上传基准图（单张）
+PATCH  /api/references/:id              # 更新基准图元数据
+PATCH  /api/references/:id/primary      # 设为主图
+DELETE /api/references/:id              # 删除基准图
+POST   /api/recommendations/generate    # 生成 AI 推荐
+GET    /api/recommendations             # 推荐历史列表
+GET    /api/recommendations/:id         # 推荐详情
+GET    /api/notes                       # 笔记列表（小红书内容雷达，预留）
+POST   /api/notes                       # 添加笔记（需认证）
+```
 
 ## 当前实现范围
 
-已实现：
-
-- DeepSeek 文案生成：选题、标题、封面文案、正文、评论引导、标签、发布时间、推荐理由
-- GPT Image 出图：使用主基准图作为角色参考，生成新场景图
+- DeepSeek 文案生成（选题/标题/正文/标签/发布时间）
+- OpenAI gpt-image-1.5 配图生成（以基准图为角色参考）
 - 基准图上传、列表、设主图、删除
-- SQLite 历史推荐记录
-- PWA 前端：首页、基准图页、设置页
-- 图片生成失败兜底：保留文案、中文画面描述和英文 prompt
+- Qwen-VL-Max 图片视觉分析打标签（SSE 流式批量处理）
+- SQLite 历史记录
+- PWA 前端（首页/基准图/设置）
 
-暂未实现：
-
-- 浏览器插件同行雷达
-- 高赞评论采集
-- 自身发布数据反哺
-- 多用户系统
-- 自动发布到小红书
-
-## 关键 API
-
-```http
-GET    /api/health
-
-GET    /api/references
-POST   /api/references/upload
-PATCH  /api/references/:id
-PATCH  /api/references/:id/primary
-DELETE /api/references/:id
-
-POST   /api/recommendations/generate
-GET    /api/recommendations
-GET    /api/recommendations/:id
-```
-
-## 构建
-
-```bash
-npm run build:server
-npm run build:web
-```
-
-## 排查问题
-
-前端连不上后端：检查 `CORS_ORIGIN` 是否是 `http://localhost:5173`。
-
-图片不生成：检查 `OPENAI_API_KEY`、`OPENAI_IMAGE_MODEL` 是否可用，并先上传至少一张基准图。
-
-基准图上传失败：默认限制 10MB，只支持 PNG、JPG、WebP。
+尚未实现：浏览器插件竞品雷达、高赞评论采集、多用户系统、自动发布到小红书。
